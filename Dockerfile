@@ -70,9 +70,9 @@ RUN if [ "$ENABLE_GPU" = "true" ] && [ "$TARGETPLATFORM" = "linux/amd64" ] ; the
     apt-get update && apt-get install -y --no-install-recommends \
     nvidia-cuda-toolkit \
     && rm -rf /var/lib/apt/lists/* ; \
-else \
+    else \
     echo "Skipping NVIDIA CUDA Toolkit installation (unsupported platform or GPU disabled)"; \
-fi
+    fi
 
 # Create and set working directory
 WORKDIR /app
@@ -88,31 +88,31 @@ RUN pip install fastapi uvicorn psutil
 
 # Install ML dependencies first for better layer caching
 RUN if [ "$INSTALL_TYPE" = "all" ] ; then \
-        pip install --no-cache-dir \
-            torch \
-            torchvision \
-            torchaudio \
-            scikit-learn \
-            nltk \
-            transformers \
-            tokenizers && \
-        python -m nltk.downloader punkt stopwords ; \
+    pip install --no-cache-dir \
+    torch \
+    torchvision \
+    torchaudio \
+    scikit-learn \
+    nltk \
+    transformers \
+    tokenizers && \
+    python -m nltk.downloader punkt stopwords ; \
     fi
 
 # Install the package
 RUN if [ "$INSTALL_TYPE" = "all" ] ; then \
-        pip install ".[all]" && \
-        python -m crawl4ai.model_loader ; \
+    pip install ".[all]" && \
+    python -m crawl4ai.model_loader ; \
     elif [ "$INSTALL_TYPE" = "torch" ] ; then \
-        pip install ".[torch]" ; \
+    pip install ".[torch]" ; \
     elif [ "$INSTALL_TYPE" = "transformer" ] ; then \
-        pip install ".[transformer]" && \
-        python -m crawl4ai.model_loader ; \
+    pip install ".[transformer]" && \
+    python -m crawl4ai.model_loader ; \
     else \
-        pip install "." ; \
+    pip install "." ; \
     fi
 
-    # Install MkDocs and required plugins
+# Install MkDocs and required plugins
 RUN pip install --no-cache-dir \
     mkdocs \
     mkdocs-material \
@@ -123,11 +123,7 @@ RUN pip install --no-cache-dir \
 RUN mkdocs build
 
 # Install Playwright and browsers
-RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then \
-    playwright install chromium; \
-    elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then \
-    playwright install chromium; \
-    fi
+RUN playwright install chromium
 
 # Expose port
 EXPOSE 8000 11235 9222 8080
